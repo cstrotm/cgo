@@ -447,7 +447,6 @@ int is_valid_directory_entry(const char *line)
 void view_directory(const char *host, const char *port,
         const char *selector, int make_current)
 {
-    int     is_dir;
     int     srvfd, i, head_read;
     char    line[1024];
     char    head[HEAD_CHECK_LEN][1024];
@@ -470,19 +469,14 @@ void view_directory(const char *host, const char *port,
     if (srvfd == -1)
         return; /* quit if not successful */
     head_read = 0;
-    is_dir = 1;
     while (head_read < HEAD_CHECK_LEN && read_line(srvfd, line, sizeof(line))) {
         strcpy(head[head_read], line);
-        if (!is_valid_directory_entry(head[head_read])) {
-            is_dir = 0;
-            break;
+	if (!is_valid_directory_entry(head[head_read])) {
+	  printf("%s",head[head_read]);
+	  snprintf(head[head_read],sizeof(head[head_read]),"i%s\t\t%s\t%s",head[head_read],current_host,current_port);
+  	  printf("%s",head[head_read]);
         }
         head_read++;
-    }
-    if (!is_dir) {
-        puts("error: Not a directory.");
-        close(srvfd);
-        return;
     }
     for (i = 0; i < head_read; i++) {
         handle_directory_line(head[i]);
@@ -750,7 +744,7 @@ int parse_uri(const char *uri)
             if (i < sizeof(parsed_selector) - 1)
                 parsed_selector[i++] = *uri;
         parsed_selector[i++] = *uri;
-    } else snprintf(parsed_selector, sizeof(parsed_selector), "%s", "/");
+    } else snprintf(parsed_selector, sizeof(parsed_selector), "%s", "");
     return 1;
 }
 
